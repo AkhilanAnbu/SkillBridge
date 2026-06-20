@@ -52,7 +52,7 @@ export function setupProfileList(onEdit) {
 
   let loadedProfiles = [];
   let currentPage = 1;
-  const profilesPerPage = 20;
+  const profilesPerPage = 10;
 
   function getVisibleProfiles() {
     const startIndex = (currentPage - 1) * profilesPerPage;
