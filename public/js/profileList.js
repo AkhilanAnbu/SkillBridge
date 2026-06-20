@@ -83,7 +83,7 @@ export function setupProfileList(onEdit) {
           type="button"
           ${currentPage === 1 ? "disabled" : ""}
         >
-          Previous 20
+          Previous 10
         </button>
 
         <span>Page ${currentPage} of ${totalPages}</span>
@@ -94,7 +94,7 @@ export function setupProfileList(onEdit) {
           type="button"
           ${currentPage === totalPages ? "disabled" : ""}
         >
-          Next 20
+          Next 10
         </button>
       </div>
     `;
