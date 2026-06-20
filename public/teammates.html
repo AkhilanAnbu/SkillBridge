@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Akhilan Anbu" />
+    <meta
+      name="description"
+      content="Create, search, edit, and delete SkillBridge teammate skill profiles."
+    />
+    <title>SkillBridge - Teammate Directory</title>
+    <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/teammates.css" />
+    <script type="module" src="./js/teammatesPage.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="./index.html">SkillBridge</a>
+      <nav aria-label="Main navigation">
+        <a href="./index.html">Home</a>
+        <a aria-current="page" href="./teammates.html">Teammate Directory</a>
+        <a href="./project-board.html">Project Board</a>
+      </nav>
+    </header>
+
+    <main class="section-wrap">
+      <section class="page-intro">
+        <div>
+          <p class="eyebrow">Akhilan's full-stack module</p>
+          <h1>Teammate Directory</h1>
+          <p>
+            Use the filters to find classmates by skills, role, availability, and teammate status.
+            You can also create, edit, and delete skill profiles from this page.
+          </p>
+        </div>
+        <button id="add-profile-link" class="button" type="button">Add my profile</button>
+      </section>
+
+      <section class="layout" aria-label="Teammate search and results">
+        <aside class="panel">
+          <h2>Search filters</h2>
+          <form id="filter-form">
+            <label for="search">Keyword</label>
+            <input id="search" name="search" type="search" placeholder="name, major, skill" />
+
+            <label for="skill">Skill</label>
+            <input id="skill" name="skill" type="search" placeholder="MongoDB, CSS, Python" />
+
+            <label for="availability">Availability</label>
+            <select id="availability" name="availability">
+              <option value="">Any</option>
+              <option>Weekdays</option>
+              <option>Weeknights</option>
+              <option>Weekends</option>
+              <option>Flexible</option>
+            </select>
+
+            <label for="experienceLevel">Experience</label>
+            <select id="experienceLevel" name="experienceLevel">
+              <option value="">Any</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+
+            <label for="preferredRole">Preferred role</label>
+            <select id="preferredRole" name="preferredRole">
+              <option value="">Any</option>
+              <option>Frontend</option>
+              <option>Backend</option>
+              <option>Full-stack</option>
+              <option>Design/PM</option>
+            </select>
+
+            <label for="teammateStatus">Team status</label>
+            <select id="teammateStatus" name="teammateStatus">
+              <option value="">Any</option>
+              <option>Looking for a teammate</option>
+              <option>Open to help</option>
+              <option>Already in a team</option>
+            </select>
+
+            <div class="filter-buttons">
+              <button class="button" type="submit">Search</button>
+              <button id="clear-filters" class="button secondary" type="button">Clear</button>
+            </div>
+          </form>
+        </aside>
+
+        <section class="results" aria-live="polite">
+          <div class="results-header">
+            <h2>Profiles</h2>
+            <div>
+              <span id="profile-count">Loading...</span>
+              <button id="refresh-profiles" class="small-button" type="button">Refresh</button>
+            </div>
+          </div>
+          <div id="profiles-list" class="profiles-list"></div>
+        </section>
+      </section>
+
+      <section id="profile-form-card" class="panel form-card">
+        <h2 id="form-title">Create a Skill Profile</h2>
+        <p>
+          Tip: Use commas for skill lists. Example: HTML, CSS, JavaScript. The same form is used for
+          editing after clicking an Edit button.
+        </p>
+
+        <form id="profile-form">
+          <input id="profile-id" name="profileId" type="hidden" />
+
+          <div class="form-grid">
+            <div>
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" required />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" required />
+            </div>
+            <div>
+              <label for="major">Major / program</label>
+              <input id="major" name="major" type="text" required />
+            </div>
+            <div>
+              <label for="form-experience">Experience</label>
+              <select id="form-experience" name="experienceLevel" required>
+                <option value="">Choose one</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label for="form-availability">Availability</label>
+              <select id="form-availability" name="availability" required>
+                <option value="">Choose one</option>
+                <option>Weekdays</option>
+                <option>Weeknights</option>
+                <option>Weekends</option>
+                <option>Flexible</option>
+              </select>
+            </div>
+            <div>
+              <label for="form-role">Preferred role</label>
+              <select id="form-role" name="preferredRole" required>
+                <option value="">Choose one</option>
+                <option>Frontend</option>
+                <option>Backend</option>
+                <option>Full-stack</option>
+                <option>Design/PM</option>
+              </select>
+            </div>
+            <div>
+              <label for="meetingPreference">Meeting preference</label>
+              <select id="meetingPreference" name="meetingPreference" required>
+                <option value="">Choose one</option>
+                <option>In person</option>
+                <option>Online</option>
+                <option>Either</option>
+              </select>
+            </div>
+            <div>
+              <label for="form-status">Teammate status</label>
+              <select id="form-status" name="teammateStatus" required>
+                <option value="">Choose one</option>
+                <option>Looking for a teammate</option>
+                <option>Open to help</option>
+                <option>Already in a team</option>
+              </select>
+            </div>
+            <div class="wide">
+              <label for="skillsToTeach">Skills I can teach</label>
+              <input id="skillsToTeach" name="skillsToTeach" type="text" required />
+            </div>
+            <div class="wide">
+              <label for="skillsToLearn">Skills I want to learn</label>
+              <input id="skillsToLearn" name="skillsToLearn" type="text" required />
+            </div>
+            <div class="wide">
+              <label for="notes">Short note</label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows="4"
+                placeholder="I am looking for a teammate who can work on weekends."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="save-profile" class="button" type="submit">Save profile</button>
+            <button id="cancel-edit" class="button secondary" type="button" hidden>
+              Cancel edit
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="message" class="message" hidden></div>
+
+    <footer>
+      <p>SkillBridge · Teammate Directory</p>
+    </footer>
+  </body>
+</html>

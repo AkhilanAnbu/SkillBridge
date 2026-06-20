@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Akhilan Anbu and Santhosh Malarvannan" />
+    <meta
+      name="description"
+      content="SkillBridge helps students find teammates, exchange skills, and start project collaborations."
+    />
+    <title>SkillBridge - Home</title>
+    <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/home.css" />
+    <script type="module" src="./js/homePage.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="./index.html">SkillBridge</a>
+      <nav aria-label="Main navigation">
+        <a aria-current="page" href="./index.html">Home</a>
+        <a href="./teammates.html">Teammate Directory</a>
+        <a href="./project-board.html">Project Board</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Skill exchange + project collaboration</p>
+          <h1>Find people to build with, not just people to message.</h1>
+          <p>
+            SkillBridge helps students list what they can teach, what they want to learn, and the
+            type of teammate they are looking for. It is built for class projects, hackathons,
+            research ideas, and side projects.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="./teammates.html">Find teammates</a>
+            <a class="button secondary" href="./project-board.html">View project board</a>
+          </div>
+        </div>
+
+        <aside class="match-card" aria-label="Example match preview">
+          <h2>Example match</h2>
+          <p>Frontend student looking for a backend partner</p>
+          <div class="meter" aria-hidden="true"><span></span></div>
+          <ul>
+            <li>Can teach: HTML, CSS, UI design</li>
+            <li>Wants to learn: Express, MongoDB</li>
+            <li>Available: Weekends</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="section-wrap">
+        <h2>How it works</h2>
+        <div class="cards">
+          <article>
+            <span>1</span>
+            <h3>Create a skill profile</h3>
+            <p>Add your skills, learning goals, role preference, and teammate status.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h3>Search people</h3>
+            <p>Filter by skills, availability, experience, role, and team status.</p>
+          </article>
+          <article>
+            <span>3</span>
+            <h3>Start collaborating</h3>
+            <p>Contact someone and move from a random group chat to a real project plan.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>SkillBridge · Web Development Project 2</p>
+    </footer>
+  </body>
+</html>
