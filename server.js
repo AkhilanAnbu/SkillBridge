@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { closeMongoConnection } from "./db/mongoClient.js";
 import skillProfilesRouter from "./routes/skillProfiles.routes.js";
+import projectCollaborationsRouter from "./routes/projectCollaborations.routes.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/api/health", (request, response) => {
 
 // Akhilan's full-stack part: Skill Profiles and Teammate Search.
 app.use("/api/skill-profiles", skillProfilesRouter);
+app.use("/api/project-collaborations", projectCollaborationsRouter);
 
 app.use((request, response) => {
   response.status(404).json({ error: "This route does not exist." });

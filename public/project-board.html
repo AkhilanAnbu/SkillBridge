@@ -6,11 +6,13 @@
     <meta name="author" content="Santhosh Malarvannan" />
     <meta
       name="description"
-      content="Project board placeholder for SkillBridge project collaboration posts."
+      content="Create, browse, filter, edit, and delete SkillBridge project collaboration posts."
     />
     <title>SkillBridge - Project Board</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./css/base.css" />
+    <link rel="stylesheet" href="./css/project-board.css" />
+    <script type="module" src="./js/projectBoardPage.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -23,16 +25,189 @@
     </header>
 
     <main class="section-wrap">
-      <section class="panel placeholder-page">
-        <p class="eyebrow">Santhosh's module</p>
-        <h1>Project Collaboration Board</h1>
+      <section class="page-intro">
+        <div>
+          <p class="eyebrow">Santhosh's full-stack module</p>
+          <h1>Project Collaboration Board</h1>
+          <p>
+            Post a project idea, list the skills and roles you need, and find collaborators. Use the
+            filters to browse projects by category, skills, roles, schedule, and status.
+          </p>
+        </div>
+        <button id="add-project-link" class="button" type="button">Post a project</button>
+      </section>
+
+      <section class="layout" aria-label="Project search and results">
+        <aside class="panel">
+          <h2>Search filters</h2>
+          <form id="filter-form">
+            <label for="search">Keyword</label>
+            <input
+              id="search"
+              name="search"
+              type="search"
+              placeholder="title, description, category"
+            />
+
+            <label for="skill">Required skill</label>
+            <input id="skill" name="skill" type="search" placeholder="React, MongoDB, Figma" />
+
+            <label for="role">Available role</label>
+            <input id="role" name="role" type="search" placeholder="Frontend, Backend, Design/PM" />
+
+            <label for="filter-category">Category</label>
+            <select id="filter-category" name="category">
+              <option value="">Any</option>
+              <option>Course project</option>
+              <option>Startup</option>
+              <option>Research</option>
+              <option>Creative</option>
+            </select>
+
+            <label for="filter-schedule">Schedule</label>
+            <select id="filter-schedule" name="schedule">
+              <option value="">Any</option>
+              <option>Weekdays</option>
+              <option>Weeknights</option>
+              <option>Weekends</option>
+              <option>Flexible</option>
+            </select>
+
+            <label for="filter-status">Status</label>
+            <select id="filter-status" name="status">
+              <option value="">Any</option>
+              <option>Looking for members</option>
+              <option>In progress</option>
+              <option>Full</option>
+              <option>Completed</option>
+            </select>
+
+            <div class="filter-buttons">
+              <button class="button" type="submit">Search</button>
+              <button id="clear-filters" class="button secondary" type="button">Clear</button>
+            </div>
+          </form>
+        </aside>
+
+        <section class="results" aria-live="polite">
+          <div class="results-header">
+            <h2>Projects</h2>
+            <div>
+              <span id="project-count">Loading...</span>
+              <button id="refresh-projects" class="small-button" type="button">Refresh</button>
+            </div>
+          </div>
+          <div id="projects-list" class="projects-list"></div>
+        </section>
+      </section>
+
+      <section id="project-form-card" class="panel form-card">
+        <h2 id="form-title">Create a Project Post</h2>
         <p>
-          This page is intentionally left as a handoff placeholder in Akhilan's branch. Santhosh
-          will add the second MongoDB collection, project form, project cards, filters, and CRUD
-          routes here.
+          Tip: Use commas for the skill, role, and member lists. Example: React, Node.js, MongoDB.
+          The same form is used for editing after clicking an Edit button.
         </p>
+
+        <form id="project-form">
+          <input id="project-id" name="projectId" type="hidden" />
+
+          <div class="form-grid">
+            <div class="wide">
+              <label for="title">Project title</label>
+              <input id="title" name="title" type="text" required />
+            </div>
+
+            <div>
+              <label for="creatorName">Your name</label>
+              <input id="creatorName" name="creatorName" type="text" required />
+            </div>
+
+            <div>
+              <label for="creatorEmail">Your email</label>
+              <input id="creatorEmail" name="creatorEmail" type="email" required />
+            </div>
+
+            <div>
+              <label for="category">Category</label>
+              <select id="category" name="category" required>
+                <option value="">Choose one</option>
+                <option>Course project</option>
+                <option>Startup</option>
+                <option>Research</option>
+                <option>Creative</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="status">Status</label>
+              <select id="status" name="status" required>
+                <option value="">Choose one</option>
+                <option>Looking for members</option>
+                <option>In progress</option>
+                <option>Full</option>
+                <option>Completed</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="schedule">Schedule</label>
+              <select id="schedule" name="schedule" required>
+                <option value="">Choose one</option>
+                <option>Weekdays</option>
+                <option>Weeknights</option>
+                <option>Weekends</option>
+                <option>Flexible</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="openPositions">Open positions</label>
+              <input id="openPositions" name="openPositions" type="number" min="0" value="1" />
+            </div>
+
+            <div class="wide">
+              <label for="requiredSkills">Required skills</label>
+              <input id="requiredSkills" name="requiredSkills" type="text" required />
+            </div>
+
+            <div class="wide">
+              <label for="learningOpportunities">Learning opportunities</label>
+              <input id="learningOpportunities" name="learningOpportunities" type="text" />
+            </div>
+
+            <div class="wide">
+              <label for="availableRoles">Available roles</label>
+              <input id="availableRoles" name="availableRoles" type="text" required />
+            </div>
+
+            <div class="wide">
+              <label for="currentMembers">Current members</label>
+              <input id="currentMembers" name="currentMembers" type="text" />
+            </div>
+
+            <div class="wide">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                rows="4"
+                placeholder="What is the project about and what kind of teammates are you looking for?"
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button id="save-project" class="button" type="submit">Save project</button>
+            <button id="cancel-edit" class="button secondary" type="button" hidden>
+              Cancel edit
+            </button>
+          </div>
+        </form>
       </section>
     </main>
+
+    <div id="message" class="message" hidden></div>
 
     <footer>
       <p>SkillBridge · Project Collaboration Board</p>

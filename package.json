@@ -8,6 +8,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "seed:skills": "node scripts/seedSkillProfiles.js",
+    "seed:projects": "node scripts/seedProjectCollaborations.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

@@ -29,6 +29,11 @@ export async function getSkillProfilesCollection() {
   return db.collection("skillProfiles");
 }
 
+export async function getProjectCollaborationsCollection() {
+  const db = await getDatabase();
+  return db.collection("projectCollaborations");
+}
+
 export async function closeMongoConnection() {
   if (client) {
     await client.close();

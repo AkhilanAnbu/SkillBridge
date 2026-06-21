@@ -51,8 +51,11 @@ A user has a project idea and needs collaborators for specific roles.
 
 ### Project Board
 
-- Placeholder in Akhilan's branch.
-- Santhosh adds form, filters, cards, and CRUD for project collaboration posts.
+- Left side filter panel: keyword, required skill, available role, category, schedule, and status.
+- Right side project results area with client-side pagination (10 per page).
+- Project cards rendered with vanilla JavaScript modules, showing skills, learning opportunities, roles, schedule, open positions, and status.
+- Project form below the board for creating and editing posts.
+- Full CRUD stored in the projectCollaborations collection.
 
 ## Color Palette
 

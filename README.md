@@ -12,7 +12,7 @@ https://northeastern.instructure.com/courses/249954
 
 ## Project Objective
 
-SkillBridge helps students find teammates, exchange skills, and collaborate on projects. This version contains Akhilan's full-stack part: Skill Profiles and Teammate Search.
+SkillBridge helps students find teammates, exchange skills, and collaborate on projects. It has two full-stack modules: Akhilan's Skill Profiles and Teammate Search, and Santhosh's Project Collaboration Board.
 
 ## Screenshot
 
@@ -25,6 +25,9 @@ Teammate Directory:
 Add Profile:
 ![add profile](docs/addprofile.png)
 
+Project Board:
+![project board](docs/projectboard.png)
+
 ## Akhilan's Features
 
 - Create a skill profile.
@@ -33,6 +36,15 @@ Add Profile:
 - Delete an existing profile.
 - Store profile data in the `skillProfiles` MongoDB collection.
 - Use Express CRUD routes and client-side rendering with vanilla JavaScript ES6 modules.
+
+## Santhosh's Features
+
+- Create a project collaboration post with a form.
+- Browse and filter posts by keyword, required skill, available role, category, schedule, and status.
+- Edit an existing project post.
+- Delete an outdated project post.
+- Store posts in the `projectCollaborations` MongoDB collection.
+- Express CRUD routes with client-side rendering using vanilla JavaScript ES6 modules.
 
 ## Tech Stack
 
@@ -86,6 +98,14 @@ To add more than 1,000 test profiles:
 
 ```bash
 npm run seed:skills
+```
+
+## Seed Project Posts
+
+To add sample project collaboration posts:
+
+```bash
+npm run seed:projects
 ```
 
 ## Code Quality
