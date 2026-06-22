@@ -1,4 +1,4 @@
-import { getProfiles, removeProfile } from "./api.js";
+import { getProfiles, removeProfile, saveProfile } from "./api.js";
 import { escapeHtml, getElement, showMessage } from "./dom.js";
 
 function chipList(items) {
@@ -11,6 +11,29 @@ function chipList(items) {
 
 function valueOrMissing(value) {
   return value ? escapeHtml(value) : "Not added";
+}
+
+function getTeammatesNeeded(profile) {
+  const value = Number.parseInt(profile.teammatesNeeded, 10);
+
+  if (Number.isNaN(value)) {
+    return 1;
+  }
+
+  return Math.max(0, value);
+}
+
+function isTeamFilled(profile) {
+  return getTeammatesNeeded(profile) === 0;
+}
+
+function teamStatusText(profile) {
+  if (isTeamFilled(profile)) {
+    return "Found teammate needed";
+  }
+
+  const needed = getTeammatesNeeded(profile);
+  return `${needed} teammate${needed === 1 ? "" : "s"} still needed`;
 }
 
 function defaultApplyMessage(profile) {
@@ -29,6 +52,7 @@ I think we could be a good match because your profile mentions:
 - Role: ${profile.preferredRole || "Not added"}
 - Availability: ${profile.availability || "Not added"}
 - Skills you can teach: ${(profile.skillsToTeach || []).join(", ") || "Not added"}
+- Teammates still needed: ${getTeammatesNeeded(profile)}
 
 Please let me know if you are still looking for a teammate.
 
@@ -37,6 +61,11 @@ Your Name`;
 }
 
 function openApplyForm(profile) {
+  if (isTeamFilled(profile)) {
+    showMessage("This profile already found the teammate needed.");
+    return;
+  }
+
   const applyCard = getElement("#apply-card");
   const applyTarget = getElement("#apply-target");
   const applyEmail = getElement("#apply-profile-email");
@@ -96,8 +125,11 @@ function setupApplyForm() {
 }
 
 function profileCard(profile) {
+  const filled = isTeamFilled(profile);
+  const needed = getTeammatesNeeded(profile);
+
   return `
-    <article class="profile-card">
+    <article class="profile-card ${filled ? "profile-filled" : ""}">
       <div class="profile-top">
         <div>
           <h3>${escapeHtml(profile.name)}</h3>
@@ -107,8 +139,14 @@ function profileCard(profile) {
             · ${valueOrMissing(profile.country)}
           </p>
         </div>
-        <strong>${escapeHtml(profile.teammateStatus)}</strong>
+        <strong class="${filled ? "status-filled" : ""}">
+          ${escapeHtml(filled ? "Found teammate needed" : profile.teammateStatus)}
+        </strong>
       </div>
+
+      <p class="${filled ? "team-filled-note" : "need-count"}">
+        ${escapeHtml(teamStatusText(profile))}
+      </p>
 
       <dl class="quick-info">
         <div><dt>Experience</dt><dd>${escapeHtml(profile.experienceLevel)}</dd></div>
@@ -117,6 +155,7 @@ function profileCard(profile) {
         <div><dt>Meeting</dt><dd>${escapeHtml(profile.meetingPreference)}</dd></div>
         <div><dt>City</dt><dd>${valueOrMissing(profile.city)}</dd></div>
         <div><dt>Country / county</dt><dd>${valueOrMissing(profile.country)}</dd></div>
+        <div><dt>Teammates needed</dt><dd>${needed}</dd></div>
       </dl>
 
       <p class="skill-label">Can teach</p>
@@ -133,9 +172,21 @@ function profileCard(profile) {
           type="button"
           data-action="apply"
           data-id="${escapeHtml(profile._id)}"
+          ${filled ? "disabled" : ""}
         >
-          Apply
+          ${filled ? "Filled" : "Apply"}
         </button>
+
+        <button
+          class="small-button secondary"
+          type="button"
+          data-action="accept"
+          data-id="${escapeHtml(profile._id)}"
+          ${filled ? "disabled" : ""}
+        >
+          Mark teammate accepted
+        </button>
+
         <button
           class="small-button secondary"
           type="button"
@@ -144,6 +195,7 @@ function profileCard(profile) {
         >
           Edit
         </button>
+
         <button
           class="small-button danger"
           type="button"
@@ -232,6 +284,27 @@ export function setupProfileList(onEdit) {
     }
   }
 
+  async function markAccepted(profile) {
+    const currentNeeded = getTeammatesNeeded(profile);
+    const nextNeeded = Math.max(0, currentNeeded - 1);
+
+    if (!window.confirm(`Mark one teammate as accepted for ${profile.name}?`)) {
+      return;
+    }
+
+    try {
+      await saveProfile({ ...profile, teammatesNeeded: nextNeeded }, profile._id);
+      showMessage(
+        nextNeeded === 0
+          ? "Profile updated: teammate need is now filled."
+          : `Profile updated: ${nextNeeded} teammate(s) still needed.`,
+      );
+      await loadProfiles();
+    } catch (error) {
+      showMessage(error.message);
+    }
+  }
+
   filterForm.addEventListener("submit", (event) => {
     event.preventDefault();
     loadProfiles();
@@ -276,6 +349,11 @@ export function setupProfileList(onEdit) {
 
     if (button.dataset.action === "apply") {
       openApplyForm(profile);
+      return;
+    }
+
+    if (button.dataset.action === "accept") {
+      await markAccepted(profile);
       return;
     }
 

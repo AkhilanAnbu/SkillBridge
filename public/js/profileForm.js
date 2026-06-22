@@ -17,6 +17,7 @@ function formToProfile(form) {
     major: formData.get("major"),
     city: formData.get("city"),
     country: formData.get("country"),
+    teammatesNeeded: Number.parseInt(formData.get("teammatesNeeded"), 10) || 0,
     experienceLevel: formData.get("experienceLevel"),
     availability: formData.get("availability"),
     preferredRole: formData.get("preferredRole"),
@@ -32,6 +33,16 @@ function listToText(list) {
   return Array.isArray(list) ? list.join(", ") : "";
 }
 
+function getTeammatesNeeded(profile) {
+  const value = Number.parseInt(profile.teammatesNeeded, 10);
+
+  if (Number.isNaN(value)) {
+    return 1;
+  }
+
+  return Math.max(0, value);
+}
+
 export function setupProfileForm(afterSave) {
   const form = getElement("#profile-form");
   const profileId = getElement("#profile-id");
@@ -41,6 +52,7 @@ export function setupProfileForm(afterSave) {
   function resetForm() {
     form.reset();
     profileId.value = "";
+    form.elements.teammatesNeeded.value = "1";
     title.textContent = "Create a Skill Profile";
     cancelButton.hidden = true;
   }
@@ -52,6 +64,7 @@ export function setupProfileForm(afterSave) {
     form.elements.major.value = profile.major || "";
     form.elements.city.value = profile.city || "";
     form.elements.country.value = profile.country || "";
+    form.elements.teammatesNeeded.value = getTeammatesNeeded(profile);
     form.elements.experienceLevel.value = profile.experienceLevel || "";
     form.elements.availability.value = profile.availability || "";
     form.elements.preferredRole.value = profile.preferredRole || "";

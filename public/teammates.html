@@ -38,8 +38,8 @@
           <p class="eyebrow">Akhilan's full-stack module</p>
           <h1>Teammate Directory</h1>
           <p>
-            Use the filters to find classmates by skills, role, availability, city, and teammate
-            status. You can create a profile, edit it, delete it, or apply to work with someone.
+            Find classmates by skills, role, city, availability, and team status. Apply to a
+            profile, or mark a teammate as accepted when the spot is filled.
           </p>
         </div>
 
@@ -62,6 +62,13 @@
 
             <label for="country">Country / county</label>
             <input id="country" name="country" type="search" placeholder="USA, India, Suffolk" />
+
+            <label for="teamAvailability">Team opening</label>
+            <select id="teamAvailability" name="teamAvailability">
+              <option value="">Any</option>
+              <option value="open">Still looking</option>
+              <option value="filled">Found teammate needed</option>
+            </select>
 
             <label for="availability">Availability</label>
             <select id="availability" name="availability">
@@ -121,8 +128,8 @@
         <h2>Apply to be a teammate</h2>
         <p id="apply-target" class="apply-target"></p>
         <p>
-          This creates an editable email draft. You can change the message before sending it from
-          your email app.
+          This opens an editable email draft. You can change the message before sending it from your
+          email app.
         </p>
 
         <form id="apply-form">
@@ -166,8 +173,8 @@
       <section id="profile-form-card" class="panel form-card">
         <h2 id="form-title">Create a Skill Profile</h2>
         <p>
-          Tip: Use commas for skill lists. Example: HTML, CSS, JavaScript. The same form is used for
-          editing after clicking an Edit button.
+          Add your skills, location, availability, and the number of teammates you still need. When
+          the number reaches 0, your profile will show that the teammate need was filled.
         </p>
 
         <form id="profile-form">
@@ -197,6 +204,11 @@
             <div>
               <label for="profile-country">Country / county</label>
               <input id="profile-country" name="country" type="text" placeholder="USA" />
+            </div>
+
+            <div>
+              <label for="teammatesNeeded">Teammates still needed</label>
+              <input id="teammatesNeeded" name="teammatesNeeded" type="number" min="0" value="1" />
             </div>
 
             <div>

@@ -15,6 +15,16 @@ function commaList(value) {
     .filter((item) => item.length > 0);
 }
 
+function numberOrDefault(value, defaultValue) {
+  const number = Number.parseInt(value, 10);
+
+  if (Number.isNaN(number)) {
+    return defaultValue;
+  }
+
+  return Math.max(0, number);
+}
+
 function makeProfile(body) {
   const profile = {
     name: text(body.name),
@@ -22,6 +32,7 @@ function makeProfile(body) {
     major: text(body.major),
     city: text(body.city),
     country: text(body.country),
+    teammatesNeeded: numberOrDefault(body.teammatesNeeded, 1),
     skillsToTeach: Array.isArray(body.skillsToTeach)
       ? body.skillsToTeach.map(text).filter(Boolean)
       : commaList(body.skillsToTeach),
@@ -67,28 +78,29 @@ function safeRegex(value) {
 
 function getFilters(query) {
   const filter = {};
-  const search = [];
+  const andFilters = [];
 
   if (query.search) {
     const regex = safeRegex(query.search);
-    search.push(
-      { name: regex },
-      { email: regex },
-      { major: regex },
-      { city: regex },
-      { country: regex },
-      { skillsToTeach: regex },
-      { skillsToLearn: regex },
-    );
+
+    andFilters.push({
+      $or: [
+        { name: regex },
+        { email: regex },
+        { major: regex },
+        { city: regex },
+        { country: regex },
+        { skillsToTeach: regex },
+        { skillsToLearn: regex },
+      ],
+    });
   }
 
   if (query.skill) {
     const regex = safeRegex(query.skill);
-    search.push({ skillsToTeach: regex }, { skillsToLearn: regex });
-  }
-
-  if (search.length > 0) {
-    filter.$or = search;
+    andFilters.push({
+      $or: [{ skillsToTeach: regex }, { skillsToLearn: regex }],
+    });
   }
 
   if (query.city) {
@@ -97,6 +109,16 @@ function getFilters(query) {
 
   if (query.country) {
     filter.country = safeRegex(query.country);
+  }
+
+  if (query.teamAvailability === "open") {
+    andFilters.push({
+      $or: [{ teammatesNeeded: { $gt: 0 } }, { teammatesNeeded: { $exists: false } }],
+    });
+  }
+
+  if (query.teamAvailability === "filled") {
+    filter.teammatesNeeded = 0;
   }
 
   if (query.availability) {
@@ -113,6 +135,10 @@ function getFilters(query) {
 
   if (query.teammateStatus) {
     filter.teammateStatus = query.teammateStatus;
+  }
+
+  if (andFilters.length > 0) {
+    filter.$and = andFilters;
   }
 
   return filter;

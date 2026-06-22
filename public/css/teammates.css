@@ -58,6 +58,11 @@
   box-shadow: 0 14px 32px rgba(80, 70, 30, 0.16);
 }
 
+.profile-filled {
+  border-left-color: var(--charcoal-dark);
+  opacity: 0.92;
+}
+
 .profile-top {
   display: flex;
   align-items: flex-start;
@@ -82,6 +87,31 @@
   background: var(--sunflower);
   font-size: 0.85rem;
   font-weight: 800;
+}
+
+.profile-top strong.status-filled {
+  border-color: var(--charcoal-dark);
+  color: var(--sunflower);
+  background: var(--charcoal-dark);
+}
+
+.need-count,
+.team-filled-note {
+  display: inline-block;
+  border-radius: 999px;
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.45rem 0.75rem;
+  font-weight: 800;
+}
+
+.need-count {
+  color: var(--charcoal-dark);
+  background: var(--soft-yellow);
+}
+
+.team-filled-note {
+  color: var(--sunflower);
+  background: var(--charcoal-dark);
 }
 
 .quick-info {
@@ -185,7 +215,8 @@
   font-weight: 700;
 }
 
-.pagination button:disabled {
+.pagination button:disabled,
+.card-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
