@@ -15,6 +15,8 @@ function formToProfile(form) {
     name: formData.get("name"),
     email: formData.get("email"),
     major: formData.get("major"),
+    city: formData.get("city"),
+    country: formData.get("country"),
     experienceLevel: formData.get("experienceLevel"),
     availability: formData.get("availability"),
     preferredRole: formData.get("preferredRole"),
@@ -48,6 +50,8 @@ export function setupProfileForm(afterSave) {
     form.elements.name.value = profile.name || "";
     form.elements.email.value = profile.email || "";
     form.elements.major.value = profile.major || "";
+    form.elements.city.value = profile.city || "";
+    form.elements.country.value = profile.country || "";
     form.elements.experienceLevel.value = profile.experienceLevel || "";
     form.elements.availability.value = profile.availability || "";
     form.elements.preferredRole.value = profile.preferredRole || "";

@@ -20,6 +20,8 @@ function makeProfile(body) {
     name: text(body.name),
     email: text(body.email).toLowerCase(),
     major: text(body.major),
+    city: text(body.city),
+    country: text(body.country),
     skillsToTeach: Array.isArray(body.skillsToTeach)
       ? body.skillsToTeach.map(text).filter(Boolean)
       : commaList(body.skillsToTeach),
@@ -71,7 +73,10 @@ function getFilters(query) {
     const regex = safeRegex(query.search);
     search.push(
       { name: regex },
+      { email: regex },
       { major: regex },
+      { city: regex },
+      { country: regex },
       { skillsToTeach: regex },
       { skillsToLearn: regex },
     );
@@ -84,6 +89,14 @@ function getFilters(query) {
 
   if (search.length > 0) {
     filter.$or = search;
+  }
+
+  if (query.city) {
+    filter.city = safeRegex(query.city);
+  }
+
+  if (query.country) {
+    filter.country = safeRegex(query.country);
   }
 
   if (query.availability) {
@@ -112,6 +125,7 @@ router.get("/", async (request, response, next) => {
       .find(getFilters(request.query))
       .sort({ updatedAt: -1 })
       .toArray();
+
     response.json(profiles);
   } catch (error) {
     next(error);

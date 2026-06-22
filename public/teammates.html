@@ -6,7 +6,7 @@
     <meta name="author" content="Akhilan Anbu" />
     <meta
       name="description"
-      content="Create, search, edit, and delete SkillBridge teammate skill profiles."
+      content="Create, search, edit, delete, and apply to SkillBridge teammate skill profiles."
     />
     <title>SkillBridge - Teammate Directory</title>
 
@@ -38,8 +38,8 @@
           <p class="eyebrow">Akhilan's full-stack module</p>
           <h1>Teammate Directory</h1>
           <p>
-            Use the filters to find classmates by skills, role, availability, and teammate status.
-            You can also create, edit, and delete skill profiles from this page.
+            Use the filters to find classmates by skills, role, availability, city, and teammate
+            status. You can create a profile, edit it, delete it, or apply to work with someone.
           </p>
         </div>
 
@@ -56,6 +56,12 @@
 
             <label for="skill">Skill</label>
             <input id="skill" name="skill" type="search" placeholder="MongoDB, CSS, Python" />
+
+            <label for="city">City</label>
+            <input id="city" name="city" type="search" placeholder="Boston, Chennai" />
+
+            <label for="country">Country / county</label>
+            <input id="country" name="country" type="search" placeholder="USA, India, Suffolk" />
 
             <label for="availability">Availability</label>
             <select id="availability" name="availability">
@@ -111,6 +117,52 @@
         </section>
       </section>
 
+      <section id="apply-card" class="panel apply-card" hidden>
+        <h2>Apply to be a teammate</h2>
+        <p id="apply-target" class="apply-target"></p>
+        <p>
+          This creates an editable email draft. You can change the message before sending it from
+          your email app.
+        </p>
+
+        <form id="apply-form">
+          <input id="apply-profile-email" name="profileEmail" type="hidden" />
+          <input id="apply-profile-name" name="profileName" type="hidden" />
+
+          <div class="form-grid">
+            <div>
+              <label for="applicant-name">Your name</label>
+              <input id="applicant-name" name="applicantName" type="text" placeholder="Your name" />
+            </div>
+
+            <div>
+              <label for="applicant-email">Your email</label>
+              <input
+                id="applicant-email"
+                name="applicantEmail"
+                type="email"
+                placeholder="your.email@example.com"
+              />
+            </div>
+
+            <div class="wide">
+              <label for="apply-subject">Email subject</label>
+              <input id="apply-subject" name="applySubject" type="text" required />
+            </div>
+
+            <div class="wide">
+              <label for="apply-message">Email message</label>
+              <textarea id="apply-message" name="applyMessage" rows="9" required></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="submit">Open email draft</button>
+            <button id="cancel-apply" class="button secondary" type="button">Cancel</button>
+          </div>
+        </form>
+      </section>
+
       <section id="profile-form-card" class="panel form-card">
         <h2 id="form-title">Create a Skill Profile</h2>
         <p>
@@ -135,6 +187,16 @@
             <div>
               <label for="major">Major / program</label>
               <input id="major" name="major" type="text" required />
+            </div>
+
+            <div>
+              <label for="profile-city">City</label>
+              <input id="profile-city" name="city" type="text" placeholder="Boston" />
+            </div>
+
+            <div>
+              <label for="profile-country">Country / county</label>
+              <input id="profile-country" name="country" type="text" placeholder="USA" />
             </div>
 
             <div>

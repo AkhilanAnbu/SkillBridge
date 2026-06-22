@@ -2,7 +2,97 @@ import { getProfiles, removeProfile } from "./api.js";
 import { escapeHtml, getElement, showMessage } from "./dom.js";
 
 function chipList(items) {
+  if (!items || items.length === 0) {
+    return `<span class="chip-empty">None added</span>`;
+  }
+
   return items.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+}
+
+function valueOrMissing(value) {
+  return value ? escapeHtml(value) : "Not added";
+}
+
+function defaultApplyMessage(profile) {
+  return `Hi ${profile.name},
+
+I found your SkillBridge profile and I am interested in applying to be your teammate.
+
+A little about me:
+- My name:
+- Skills I can contribute:
+- Skills I want to learn:
+- My availability:
+- Project or class I am working on:
+
+I think we could be a good match because your profile mentions:
+- Role: ${profile.preferredRole || "Not added"}
+- Availability: ${profile.availability || "Not added"}
+- Skills you can teach: ${(profile.skillsToTeach || []).join(", ") || "Not added"}
+
+Please let me know if you are still looking for a teammate.
+
+Thank you,
+Your Name`;
+}
+
+function openApplyForm(profile) {
+  const applyCard = getElement("#apply-card");
+  const applyTarget = getElement("#apply-target");
+  const applyEmail = getElement("#apply-profile-email");
+  const applyName = getElement("#apply-profile-name");
+  const subject = getElement("#apply-subject");
+  const message = getElement("#apply-message");
+
+  applyTarget.textContent = `Applying to ${profile.name} at ${profile.email}`;
+  applyEmail.value = profile.email || "";
+  applyName.value = profile.name || "";
+  subject.value = `SkillBridge teammate application for ${profile.name}`;
+  message.value = defaultApplyMessage(profile);
+
+  applyCard.hidden = false;
+  applyCard.scrollIntoView({ behavior: "smooth" });
+}
+
+function setupApplyForm() {
+  const applyCard = getElement("#apply-card");
+  const applyForm = getElement("#apply-form");
+  const cancelApply = getElement("#cancel-apply");
+
+  applyForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(applyForm);
+    const profileEmail = formData.get("profileEmail");
+    const applicantName = formData.get("applicantName");
+    const applicantEmail = formData.get("applicantEmail");
+    const subject = formData.get("applySubject");
+    let body = formData.get("applyMessage");
+
+    if (applicantName || applicantEmail) {
+      body += `\n\nApplicant details:\n`;
+    }
+
+    if (applicantName) {
+      body += `Name: ${applicantName}\n`;
+    }
+
+    if (applicantEmail) {
+      body += `Email: ${applicantEmail}\n`;
+    }
+
+    const mailtoLink = `mailto:${encodeURIComponent(profileEmail)}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+    showMessage("Email draft opened. You can edit and send it from your email app.");
+  });
+
+  cancelApply.addEventListener("click", () => {
+    applyForm.reset();
+    applyCard.hidden = true;
+  });
 }
 
 function profileCard(profile) {
@@ -11,7 +101,11 @@ function profileCard(profile) {
       <div class="profile-top">
         <div>
           <h3>${escapeHtml(profile.name)}</h3>
-          <p>${escapeHtml(profile.major)} · ${escapeHtml(profile.email)}</p>
+          <p>
+            ${escapeHtml(profile.major)}
+            · ${valueOrMissing(profile.city)}
+            · ${valueOrMissing(profile.country)}
+          </p>
         </div>
         <strong>${escapeHtml(profile.teammateStatus)}</strong>
       </div>
@@ -21,6 +115,8 @@ function profileCard(profile) {
         <div><dt>Available</dt><dd>${escapeHtml(profile.availability)}</dd></div>
         <div><dt>Role</dt><dd>${escapeHtml(profile.preferredRole)}</dd></div>
         <div><dt>Meeting</dt><dd>${escapeHtml(profile.meetingPreference)}</dd></div>
+        <div><dt>City</dt><dd>${valueOrMissing(profile.city)}</dd></div>
+        <div><dt>Country / county</dt><dd>${valueOrMissing(profile.country)}</dd></div>
       </dl>
 
       <p class="skill-label">Can teach</p>
@@ -32,9 +128,30 @@ function profileCard(profile) {
       <p>${escapeHtml(profile.notes || "No extra note added.")}</p>
 
       <div class="card-actions">
-        <a class="small-button" href="mailto:${encodeURIComponent(profile.email)}">Email</a>
-        <button class="small-button" type="button" data-action="edit" data-id="${profile._id}">Edit</button>
-        <button class="small-button danger" type="button" data-action="delete" data-id="${profile._id}">Delete</button>
+        <button
+          class="small-button"
+          type="button"
+          data-action="apply"
+          data-id="${escapeHtml(profile._id)}"
+        >
+          Apply
+        </button>
+        <button
+          class="small-button secondary"
+          type="button"
+          data-action="edit"
+          data-id="${escapeHtml(profile._id)}"
+        >
+          Edit
+        </button>
+        <button
+          class="small-button danger"
+          type="button"
+          data-action="delete"
+          data-id="${escapeHtml(profile._id)}"
+        >
+          Delete
+        </button>
       </div>
     </article>
   `;
@@ -53,6 +170,8 @@ export function setupProfileList(onEdit) {
   let loadedProfiles = [];
   let currentPage = 1;
   const profilesPerPage = 10;
+
+  setupApplyForm();
 
   function getVisibleProfiles() {
     const startIndex = (currentPage - 1) * profilesPerPage;
@@ -152,6 +271,11 @@ export function setupProfileList(onEdit) {
 
     if (!profile) {
       showMessage("Please refresh and try again.");
+      return;
+    }
+
+    if (button.dataset.action === "apply") {
+      openApplyForm(profile);
       return;
     }
 
