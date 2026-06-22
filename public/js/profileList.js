@@ -303,7 +303,7 @@ export function setupProfileList(onEdit) {
 
   let loadedProfiles = [];
   let currentPage = 1;
-  const profilesPerPage = 10;
+  const profilesPerPage = 5;
 
   setupApplyForm();
 
@@ -336,7 +336,7 @@ export function setupProfileList(onEdit) {
           type="button"
           ${currentPage === 1 ? "disabled" : ""}
         >
-          Previous 10
+          Previous 5
         </button>
 
         <span>Page ${currentPage} of ${totalPages}</span>
@@ -347,7 +347,7 @@ export function setupProfileList(onEdit) {
           type="button"
           ${currentPage === totalPages ? "disabled" : ""}
         >
-          Next 10
+          Next 5
         </button>
       </div>
     `;

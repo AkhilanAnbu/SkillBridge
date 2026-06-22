@@ -269,3 +269,44 @@
   background: var(--surface);
   box-shadow: 0 20px 60px rgba(37, 39, 25, 0.25);
 }
+
+.teammate-guide {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(229, 185, 0, 0.45);
+}
+
+.teammate-guide h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.guide-step {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(229, 185, 0, 0.45);
+  border-radius: 18px;
+  background: rgba(255, 245, 190, 0.55);
+}
+
+.guide-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.guide-step h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.guide-step p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
