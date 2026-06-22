@@ -102,21 +102,17 @@ function assertOwnerCode(inputCode, profile) {
   const savedCode = text(profile.ownerCode);
   const isSeededDemoProfile = text(profile.email).endsWith("@skillbridge.edu");
 
-  if (isSeededDemoProfile && enteredCode === "demo1234") {
+  if (savedCode && enteredCode === savedCode) {
     return;
   }
 
-  if (!savedCode) {
-    const error = new Error("This profile does not have an owner code.");
-    error.status = 403;
-    throw error;
+  if (!savedCode && isSeededDemoProfile && enteredCode === "demo1234") {
+    return;
   }
 
-  if (!enteredCode || enteredCode !== savedCode) {
-    const error = new Error("Incorrect profile owner code.");
-    error.status = 403;
-    throw error;
-  }
+  const error = new Error("Incorrect profile owner code.");
+  error.status = 403;
+  throw error;
 }
 
 function getFilters(query) {
@@ -201,6 +197,24 @@ router.get("/", async (request, response, next) => {
   }
 });
 
+router.post("/:id/verify-owner", async (request, response, next) => {
+  try {
+    const collection = await getSkillProfilesCollection();
+    const _id = getMongoId(request.params.id);
+    const existingProfile = await collection.findOne({ _id });
+
+    if (!existingProfile) {
+      return response.status(404).json({ error: "Profile not found." });
+    }
+
+    assertOwnerCode(request.body.ownerCode, existingProfile);
+
+    return response.json(redactProfile(existingProfile));
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.post("/", async (request, response, next) => {
   try {
     const collection = await getSkillProfilesCollection();
@@ -228,11 +242,20 @@ router.put("/:id", async (request, response, next) => {
       return response.status(404).json({ error: "Profile not found." });
     }
 
-    assertOwnerCode(request.body.ownerCode, existingProfile);
+    const authorizationCode = request.body.currentOwnerCode || request.body.ownerCode;
+    assertOwnerCode(authorizationCode, existingProfile);
+
+    const newOwnerCode = text(request.body.ownerCode);
+
+    if (newOwnerCode.length < 4) {
+      return response.status(400).json({
+        error: "Owner code must be at least 4 characters.",
+      });
+    }
 
     const updatedProfile = {
       ...makeProfile(request.body, { requireOwnerCode: false }),
-      ownerCode: existingProfile.ownerCode,
+      ownerCode: newOwnerCode,
       updatedAt: new Date(),
     };
 

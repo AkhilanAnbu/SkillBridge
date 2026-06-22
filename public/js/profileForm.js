@@ -15,6 +15,7 @@ function formToProfile(form) {
     name: formData.get("name"),
     email: formData.get("email"),
     ownerCode: formData.get("ownerCode"),
+    currentOwnerCode: formData.get("currentOwnerCode"),
     major: formData.get("major"),
     city: formData.get("city"),
     country: formData.get("country"),
@@ -47,6 +48,7 @@ function getTeammatesNeeded(profile) {
 export function setupProfileForm(afterSave) {
   const form = getElement("#profile-form");
   const profileId = getElement("#profile-id");
+  const currentOwnerCode = getElement("#current-owner-code");
   const title = getElement("#form-title");
   const cancelButton = getElement("#cancel-edit");
   const ownerCodeInput = getElement("#ownerCode");
@@ -62,6 +64,7 @@ export function setupProfileForm(afterSave) {
   function resetForm() {
     form.reset();
     profileId.value = "";
+    currentOwnerCode.value = "";
     form.elements.teammatesNeeded.value = "1";
     form.elements.ownerCode.required = true;
     ownerCodeInput.type = "password";
@@ -72,9 +75,16 @@ export function setupProfileForm(afterSave) {
 
   function editProfile(profile) {
     profileId.value = profile._id || "";
+
+    // This proves ownership when saving.
+    currentOwnerCode.value = profile.currentOwnerCode || profile.ownerCode || "";
+
     form.elements.name.value = profile.name || "";
     form.elements.email.value = profile.email || "";
-    form.elements.ownerCode.value = profile.ownerCode || "";
+
+    // This visible field can be changed to update the owner code.
+    form.elements.ownerCode.value = profile.ownerCode || profile.currentOwnerCode || "";
+
     form.elements.major.value = profile.major || "";
     form.elements.city.value = profile.city || "";
     form.elements.country.value = profile.country || "";

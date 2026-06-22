@@ -85,6 +85,24 @@ function setupOwnerCodeModal() {
   };
 }
 
+async function verifyOwnerCode(profileId, ownerCode) {
+  const response = await fetch(`/api/skill-profiles/${profileId}/verify-owner`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ownerCode }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || "Incorrect profile owner code.");
+  }
+
+  return data;
+}
+
 async function deleteProfile(profileId, ownerCode) {
   const response = await fetch(`/api/skill-profiles/${profileId}`, {
     method: "DELETE",
@@ -356,6 +374,13 @@ export function setupProfileList(onEdit) {
       return;
     }
 
+    try {
+      await verifyOwnerCode(profile._id, ownerCode);
+    } catch (error) {
+      showMessage(error.message);
+      return;
+    }
+
     const currentNeeded = getTeammatesNeeded(profile);
     const nextNeeded = Math.max(0, currentNeeded - 1);
 
@@ -364,12 +389,22 @@ export function setupProfileList(onEdit) {
     }
 
     try {
-      await saveProfile({ ...profile, ownerCode, teammatesNeeded: nextNeeded }, profile._id);
+      await saveProfile(
+        {
+          ...profile,
+          currentOwnerCode: ownerCode,
+          ownerCode,
+          teammatesNeeded: nextNeeded,
+        },
+        profile._id,
+      );
+
       showMessage(
         nextNeeded === 0
           ? "Profile updated: teammate need is now filled."
           : `Profile updated: ${nextNeeded} teammate(s) still needed.`,
       );
+
       await loadProfiles();
     } catch (error) {
       showMessage(error.message);
@@ -436,8 +471,18 @@ export function setupProfileList(onEdit) {
         return;
       }
 
-      onEdit({ ...profile, ownerCode });
-      showMessage("Edit mode opened. Update the form and click Save profile.");
+      try {
+        const verifiedProfile = await verifyOwnerCode(profile._id, ownerCode);
+        onEdit({
+          ...verifiedProfile,
+          currentOwnerCode: ownerCode,
+          ownerCode,
+        });
+        showMessage("Edit mode opened. Update the form and click Save profile.");
+      } catch (error) {
+        showMessage(error.message);
+      }
+
       return;
     }
 
