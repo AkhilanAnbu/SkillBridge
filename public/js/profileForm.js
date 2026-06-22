@@ -14,6 +14,7 @@ function formToProfile(form) {
   return {
     name: formData.get("name"),
     email: formData.get("email"),
+    ownerCode: formData.get("ownerCode"),
     major: formData.get("major"),
     city: formData.get("city"),
     country: formData.get("country"),
@@ -48,19 +49,32 @@ export function setupProfileForm(afterSave) {
   const profileId = getElement("#profile-id");
   const title = getElement("#form-title");
   const cancelButton = getElement("#cancel-edit");
+  const ownerCodeInput = getElement("#ownerCode");
+  const toggleOwnerCodeButton = getElement("#toggle-owner-code");
+
+  toggleOwnerCodeButton.addEventListener("click", () => {
+    const isHidden = ownerCodeInput.type === "password";
+
+    ownerCodeInput.type = isHidden ? "text" : "password";
+    toggleOwnerCodeButton.textContent = isHidden ? "Hide" : "Show";
+  });
 
   function resetForm() {
     form.reset();
     profileId.value = "";
     form.elements.teammatesNeeded.value = "1";
+    form.elements.ownerCode.required = true;
+    ownerCodeInput.type = "password";
+    toggleOwnerCodeButton.textContent = "Show";
     title.textContent = "Create a Skill Profile";
     cancelButton.hidden = true;
   }
 
   function editProfile(profile) {
-    profileId.value = profile._id;
+    profileId.value = profile._id || "";
     form.elements.name.value = profile.name || "";
     form.elements.email.value = profile.email || "";
+    form.elements.ownerCode.value = profile.ownerCode || "";
     form.elements.major.value = profile.major || "";
     form.elements.city.value = profile.city || "";
     form.elements.country.value = profile.country || "";
@@ -76,6 +90,9 @@ export function setupProfileForm(afterSave) {
 
     title.textContent = `Edit ${profile.name}'s profile`;
     cancelButton.hidden = false;
+    ownerCodeInput.type = "password";
+    toggleOwnerCodeButton.textContent = "Show";
+
     getElement("#profile-form-card").scrollIntoView({ behavior: "smooth" });
   }
 

@@ -1,53 +1,234 @@
-import { getProjects, removeProject } from "./projectApi.js";
+import { getProfiles, saveProfile } from "./api.js";
 import { escapeHtml, getElement, showMessage } from "./dom.js";
 
 function chipList(items) {
   if (!items || items.length === 0) {
-    return `<span class="chip-empty">None listed</span>`;
+    return `<span class="chip-empty">None added</span>`;
   }
+
   return items.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 }
 
-function statusClass(status) {
-  return (
-    "status-" +
-    String(status || "")
-      .toLowerCase()
-      .replaceAll(" ", "-")
-  );
+function valueOrMissing(value) {
+  return value ? escapeHtml(value) : "Not added";
 }
 
-function projectCard(project) {
+function getTeammatesNeeded(profile) {
+  const value = Number.parseInt(profile.teammatesNeeded, 10);
+
+  if (Number.isNaN(value)) {
+    return 1;
+  }
+
+  return Math.max(0, value);
+}
+
+function isTeamFilled(profile) {
+  return getTeammatesNeeded(profile) === 0;
+}
+
+function teamStatusText(profile) {
+  if (isTeamFilled(profile)) {
+    return "Found teammate needed";
+  }
+
+  const needed = getTeammatesNeeded(profile);
+  return `${needed} teammate${needed === 1 ? "" : "s"} still needed`;
+}
+
+function getOwnerCode(actionName) {
+  const code = window.prompt(`Enter the profile owner code to ${actionName}:`);
+
+  if (!code) {
+    showMessage("Owner code is required for this action.");
+    return "";
+  }
+
+  return code.trim();
+}
+
+async function deleteProfile(profileId, ownerCode) {
+  const response = await fetch(`/api/skill-profiles/${profileId}`, {
+    method: "DELETE",
+    headers: {
+      "x-owner-code": ownerCode,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Could not delete profile.");
+  }
+}
+
+function defaultApplyMessage(profile) {
+  return `Hi ${profile.name},
+
+I found your SkillBridge profile and I am interested in applying to be your teammate.
+
+A little about me:
+- My name:
+- Skills I can contribute:
+- Skills I want to learn:
+- My availability:
+- Project or class I am working on:
+
+I think we could be a good match because your profile mentions:
+- Role: ${profile.preferredRole || "Not added"}
+- Availability: ${profile.availability || "Not added"}
+- Skills you can teach: ${(profile.skillsToTeach || []).join(", ") || "Not added"}
+- Teammates still needed: ${getTeammatesNeeded(profile)}
+
+Please let me know if you are still looking for a teammate.
+
+Thank you,
+Your Name`;
+}
+
+function openApplyForm(profile) {
+  if (isTeamFilled(profile)) {
+    showMessage("This profile already found the teammate needed.");
+    return;
+  }
+
+  const applyCard = getElement("#apply-card");
+  const applyTarget = getElement("#apply-target");
+  const applyEmail = getElement("#apply-profile-email");
+  const applyName = getElement("#apply-profile-name");
+  const subject = getElement("#apply-subject");
+  const message = getElement("#apply-message");
+
+  applyTarget.textContent = `Applying to ${profile.name} at ${profile.email}`;
+  applyEmail.value = profile.email || "";
+  applyName.value = profile.name || "";
+  subject.value = `SkillBridge teammate application for ${profile.name}`;
+  message.value = defaultApplyMessage(profile);
+
+  applyCard.hidden = false;
+  applyCard.scrollIntoView({ behavior: "smooth" });
+}
+
+function setupApplyForm() {
+  const applyCard = getElement("#apply-card");
+  const applyForm = getElement("#apply-form");
+  const cancelApply = getElement("#cancel-apply");
+
+  applyForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(applyForm);
+    const profileEmail = formData.get("profileEmail");
+    const applicantName = formData.get("applicantName");
+    const applicantEmail = formData.get("applicantEmail");
+    const subject = formData.get("applySubject");
+    let body = formData.get("applyMessage");
+
+    if (applicantName || applicantEmail) {
+      body += `\n\nApplicant details:\n`;
+    }
+
+    if (applicantName) {
+      body += `Name: ${applicantName}\n`;
+    }
+
+    if (applicantEmail) {
+      body += `Email: ${applicantEmail}\n`;
+    }
+
+    const mailtoLink = `mailto:${encodeURIComponent(profileEmail)}?subject=${encodeURIComponent(
+      subject,
+    )}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+    showMessage("Email draft opened. You can edit and send it from your email app.");
+  });
+
+  cancelApply.addEventListener("click", () => {
+    applyForm.reset();
+    applyCard.hidden = true;
+  });
+}
+
+function profileCard(profile) {
+  const filled = isTeamFilled(profile);
+  const needed = getTeammatesNeeded(profile);
+
   return `
-    <article class="project-card">
-      <div class="project-top">
+    <article class="profile-card ${filled ? "profile-filled" : ""}">
+      <div class="profile-top">
         <div>
-          <h3>${escapeHtml(project.title)}</h3>
-          <p>${escapeHtml(project.category)} · ${escapeHtml(project.creatorName)}</p>
+          <h3>${escapeHtml(profile.name)}</h3>
+          <p>
+            ${escapeHtml(profile.major)}
+            · ${valueOrMissing(profile.city)}
+            · ${valueOrMissing(profile.country)}
+          </p>
         </div>
-        <strong class="${statusClass(project.status)}">${escapeHtml(project.status)}</strong>
+        <strong class="${filled ? "status-filled" : ""}">
+          ${escapeHtml(filled ? "Found teammate needed" : profile.teammateStatus)}
+        </strong>
       </div>
 
-      <p class="project-desc">${escapeHtml(project.description)}</p>
+      <p class="${filled ? "team-filled-note" : "need-count"}">
+        ${escapeHtml(teamStatusText(profile))}
+      </p>
 
       <dl class="quick-info">
-        <div><dt>Schedule</dt><dd>${escapeHtml(project.schedule || "Flexible")}</dd></div>
-        <div><dt>Open positions</dt><dd>${escapeHtml(project.openPositions || "—")}</dd></div>
+        <div><dt>Experience</dt><dd>${escapeHtml(profile.experienceLevel)}</dd></div>
+        <div><dt>Available</dt><dd>${escapeHtml(profile.availability)}</dd></div>
+        <div><dt>Role</dt><dd>${escapeHtml(profile.preferredRole)}</dd></div>
+        <div><dt>Meeting</dt><dd>${escapeHtml(profile.meetingPreference)}</dd></div>
+        <div><dt>City</dt><dd>${valueOrMissing(profile.city)}</dd></div>
+        <div><dt>Country / county</dt><dd>${valueOrMissing(profile.country)}</dd></div>
+        <div><dt>Teammates needed</dt><dd>${needed}</dd></div>
       </dl>
 
-      <p class="skill-label">Skills needed</p>
-      <div class="chips">${chipList(project.requiredSkills)}</div>
+      <p class="skill-label">Can teach</p>
+      <div class="chips">${chipList(profile.skillsToTeach || [])}</div>
 
-      <p class="skill-label">You can learn</p>
-      <div class="chips">${chipList(project.learningOpportunities)}</div>
+      <p class="skill-label">Wants to learn</p>
+      <div class="chips">${chipList(profile.skillsToLearn || [])}</div>
 
-      <p class="skill-label">Open roles</p>
-      <div class="chips">${chipList(project.availableRoles)}</div>
+      <p>${escapeHtml(profile.notes || "No extra note added.")}</p>
 
       <div class="card-actions">
-        <a class="small-button" href="mailto:${encodeURIComponent(project.creatorEmail)}">Email</a>
-        <button class="small-button" type="button" data-action="edit" data-id="${project._id}">Edit</button>
-        <button class="small-button danger" type="button" data-action="delete" data-id="${project._id}">Delete</button>
+        <button
+          class="small-button"
+          type="button"
+          data-action="apply"
+          data-id="${escapeHtml(profile._id)}"
+          ${filled ? "disabled" : ""}
+        >
+          ${filled ? "Filled" : "Apply"}
+        </button>
+
+        <button
+          class="small-button secondary"
+          type="button"
+          data-action="accept"
+          data-id="${escapeHtml(profile._id)}"
+          ${filled ? "disabled" : ""}
+        >
+          Mark teammate accepted
+        </button>
+
+        <button
+          class="small-button secondary"
+          type="button"
+          data-action="edit"
+          data-id="${escapeHtml(profile._id)}"
+        >
+          Edit
+        </button>
+
+        <button
+          class="small-button danger"
+          type="button"
+          data-action="delete"
+          data-id="${escapeHtml(profile._id)}"
+        >
+          Delete
+        </button>
       </div>
     </article>
   `;
@@ -58,36 +239,38 @@ function getFilterValues() {
   return Object.fromEntries(data.entries());
 }
 
-export function setupProjectList(onEdit) {
-  const list = getElement("#projects-list");
-  const count = getElement("#project-count");
+export function setupProfileList(onEdit) {
+  const list = getElement("#profiles-list");
+  const count = getElement("#profile-count");
   const filterForm = getElement("#filter-form");
 
-  let loadedProjects = [];
+  let loadedProfiles = [];
   let currentPage = 1;
-  const projectsPerPage = 10;
+  const profilesPerPage = 10;
 
-  function getVisibleProjects() {
-    const startIndex = (currentPage - 1) * projectsPerPage;
-    const endIndex = startIndex + projectsPerPage;
-    return loadedProjects.slice(startIndex, endIndex);
+  setupApplyForm();
+
+  function getVisibleProfiles() {
+    const startIndex = (currentPage - 1) * profilesPerPage;
+    const endIndex = startIndex + profilesPerPage;
+    return loadedProfiles.slice(startIndex, endIndex);
   }
 
-  function renderProjects() {
-    const totalPages = Math.ceil(loadedProjects.length / projectsPerPage);
-    const visibleProjects = getVisibleProjects();
+  function renderProfiles() {
+    const totalPages = Math.ceil(loadedProfiles.length / profilesPerPage);
+    const visibleProfiles = getVisibleProfiles();
 
-    count.textContent = `${loadedProjects.length} project${
-      loadedProjects.length === 1 ? "" : "s"
+    count.textContent = `${loadedProfiles.length} profile${
+      loadedProfiles.length === 1 ? "" : "s"
     } total`;
 
-    if (loadedProjects.length === 0) {
-      list.innerHTML = `<p class="empty">No matching projects yet. Try different filters or create one.</p>`;
+    if (loadedProfiles.length === 0) {
+      list.innerHTML = `<p class="empty">No matching profiles yet. Try different filters.</p>`;
       return;
     }
 
     list.innerHTML = `
-      ${visibleProjects.map(projectCard).join("")}
+      ${visibleProfiles.map(profileCard).join("")}
 
       <div class="pagination">
         <button
@@ -113,30 +296,57 @@ export function setupProjectList(onEdit) {
     `;
   }
 
-  async function loadProjects(filters = getFilterValues()) {
-    list.innerHTML = `<p class="loading">Loading projects...</p>`;
+  async function loadProfiles(filters = getFilterValues()) {
+    list.innerHTML = `<p class="loading">Loading profiles...</p>`;
 
     try {
-      loadedProjects = await getProjects(filters);
+      loadedProfiles = await getProfiles(filters);
       currentPage = 1;
-      renderProjects();
+      renderProfiles();
     } catch (error) {
-      count.textContent = "Could not load projects";
+      count.textContent = "Could not load profiles";
       list.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
+    }
+  }
+
+  async function markAccepted(profile) {
+    const ownerCode = getOwnerCode("mark a teammate as accepted");
+
+    if (!ownerCode) {
+      return;
+    }
+
+    const currentNeeded = getTeammatesNeeded(profile);
+    const nextNeeded = Math.max(0, currentNeeded - 1);
+
+    if (!window.confirm(`Mark one teammate as accepted for ${profile.name}?`)) {
+      return;
+    }
+
+    try {
+      await saveProfile({ ...profile, ownerCode, teammatesNeeded: nextNeeded }, profile._id);
+      showMessage(
+        nextNeeded === 0
+          ? "Profile updated: teammate need is now filled."
+          : `Profile updated: ${nextNeeded} teammate(s) still needed.`,
+      );
+      await loadProfiles();
+    } catch (error) {
+      showMessage(error.message);
     }
   }
 
   filterForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    loadProjects();
+    loadProfiles();
   });
 
   getElement("#clear-filters").addEventListener("click", () => {
     filterForm.reset();
-    loadProjects({});
+    loadProfiles({});
   });
 
-  getElement("#refresh-projects").addEventListener("click", () => loadProjects());
+  getElement("#refresh-profiles").addEventListener("click", () => loadProfiles());
 
   list.addEventListener("click", async (event) => {
     const pageButton = event.target.closest("#previous-page, #next-page");
@@ -150,7 +360,7 @@ export function setupProjectList(onEdit) {
         currentPage += 1;
       }
 
-      renderProjects();
+      renderProfiles();
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -161,30 +371,54 @@ export function setupProjectList(onEdit) {
       return;
     }
 
-    const project = loadedProjects.find((item) => item._id === button.dataset.id);
+    const profile = loadedProfiles.find((item) => item._id === button.dataset.id);
 
-    if (!project) {
+    if (!profile) {
       showMessage("Please refresh and try again.");
       return;
     }
 
+    if (button.dataset.action === "apply") {
+      openApplyForm(profile);
+      return;
+    }
+
+    if (button.dataset.action === "accept") {
+      await markAccepted(profile);
+      return;
+    }
+
     if (button.dataset.action === "edit") {
-      onEdit(project);
+      const ownerCode = getOwnerCode("edit this profile");
+
+      if (!ownerCode) {
+        return;
+      }
+
+      onEdit({ ...profile, ownerCode });
       return;
     }
 
-    if (!window.confirm(`Delete the project "${project.title}"?`)) {
-      return;
-    }
+    if (button.dataset.action === "delete") {
+      const ownerCode = getOwnerCode("delete this profile");
 
-    try {
-      await removeProject(project._id);
-      showMessage("Project deleted");
-      await loadProjects();
-    } catch (error) {
-      showMessage(error.message);
+      if (!ownerCode) {
+        return;
+      }
+
+      if (!window.confirm(`Delete ${profile.name}'s profile?`)) {
+        return;
+      }
+
+      try {
+        await deleteProfile(profile._id, ownerCode);
+        showMessage("Profile deleted");
+        await loadProfiles();
+      } catch (error) {
+        showMessage(error.message);
+      }
     }
   });
 
-  return { loadProjects };
+  return { loadProfiles };
 }

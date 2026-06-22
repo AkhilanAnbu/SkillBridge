@@ -25,7 +25,9 @@ function numberOrDefault(value, defaultValue) {
   return Math.max(0, number);
 }
 
-function makeProfile(body) {
+function makeProfile(body, options = { requireOwnerCode: true }) {
+  const ownerCode = text(body.ownerCode);
+
   const profile = {
     name: text(body.name),
     email: text(body.email).toLowerCase(),
@@ -53,10 +55,20 @@ function makeProfile(body) {
     throw error;
   }
 
+  if (options.requireOwnerCode && ownerCode.length < 4) {
+    const error = new Error("Please add a profile owner code with at least 4 characters.");
+    error.status = 400;
+    throw error;
+  }
+
   if (profile.skillsToTeach.length === 0 || profile.skillsToLearn.length === 0) {
     const error = new Error("Please add at least one teaching skill and one learning skill.");
     error.status = 400;
     throw error;
+  }
+
+  if (ownerCode) {
+    profile.ownerCode = ownerCode;
   }
 
   return profile;
@@ -74,6 +86,37 @@ function getMongoId(id) {
 
 function safeRegex(value) {
   return new RegExp(text(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+}
+
+function redactProfile(profile) {
+  if (!profile) {
+    return profile;
+  }
+
+  const { ownerCode: _ownerCode, ...safeProfile } = profile;
+  return safeProfile;
+}
+
+function assertOwnerCode(inputCode, profile) {
+  const enteredCode = text(inputCode);
+  const savedCode = text(profile.ownerCode);
+  const isSeededDemoProfile = text(profile.email).endsWith("@skillbridge.edu");
+
+  if (isSeededDemoProfile && enteredCode === "demo1234") {
+    return;
+  }
+
+  if (!savedCode) {
+    const error = new Error("This profile does not have an owner code.");
+    error.status = 403;
+    throw error;
+  }
+
+  if (!enteredCode || enteredCode !== savedCode) {
+    const error = new Error("Incorrect profile owner code.");
+    error.status = 403;
+    throw error;
+  }
 }
 
 function getFilters(query) {
@@ -152,7 +195,7 @@ router.get("/", async (request, response, next) => {
       .sort({ updatedAt: -1 })
       .toArray();
 
-    response.json(profiles);
+    response.json(profiles.map(redactProfile));
   } catch (error) {
     next(error);
   }
@@ -163,13 +206,13 @@ router.post("/", async (request, response, next) => {
     const collection = await getSkillProfilesCollection();
     const now = new Date();
     const profile = {
-      ...makeProfile(request.body),
+      ...makeProfile(request.body, { requireOwnerCode: true }),
       createdAt: now,
       updatedAt: now,
     };
 
     const result = await collection.insertOne(profile);
-    response.status(201).json({ ...profile, _id: result.insertedId });
+    response.status(201).json(redactProfile({ ...profile, _id: result.insertedId }));
   } catch (error) {
     next(error);
   }
@@ -178,17 +221,28 @@ router.post("/", async (request, response, next) => {
 router.put("/:id", async (request, response, next) => {
   try {
     const collection = await getSkillProfilesCollection();
-    const result = await collection.findOneAndUpdate(
-      { _id: getMongoId(request.params.id) },
-      { $set: { ...makeProfile(request.body), updatedAt: new Date() } },
-      { returnDocument: "after" },
-    );
+    const _id = getMongoId(request.params.id);
+    const existingProfile = await collection.findOne({ _id });
 
-    if (!result) {
+    if (!existingProfile) {
       return response.status(404).json({ error: "Profile not found." });
     }
 
-    return response.json(result);
+    assertOwnerCode(request.body.ownerCode, existingProfile);
+
+    const updatedProfile = {
+      ...makeProfile(request.body, { requireOwnerCode: false }),
+      ownerCode: existingProfile.ownerCode,
+      updatedAt: new Date(),
+    };
+
+    const result = await collection.findOneAndUpdate(
+      { _id },
+      { $set: updatedProfile },
+      { returnDocument: "after" },
+    );
+
+    return response.json(redactProfile(result));
   } catch (error) {
     return next(error);
   }
@@ -197,12 +251,16 @@ router.put("/:id", async (request, response, next) => {
 router.delete("/:id", async (request, response, next) => {
   try {
     const collection = await getSkillProfilesCollection();
-    const result = await collection.deleteOne({ _id: getMongoId(request.params.id) });
+    const _id = getMongoId(request.params.id);
+    const existingProfile = await collection.findOne({ _id });
 
-    if (result.deletedCount === 0) {
+    if (!existingProfile) {
       return response.status(404).json({ error: "Profile not found." });
     }
 
+    assertOwnerCode(request.get("x-owner-code"), existingProfile);
+
+    await collection.deleteOne({ _id });
     return response.status(204).send();
   } catch (error) {
     return next(error);

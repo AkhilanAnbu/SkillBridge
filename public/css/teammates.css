@@ -234,3 +234,38 @@
     flex-direction: column;
   }
 }
+
+.owner-code-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.owner-code-row .small-button {
+  height: 100%;
+  padding-inline: 1rem;
+}
+
+.owner-code-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(37, 39, 25, 0.55);
+}
+
+.owner-code-modal[hidden] {
+  display: none;
+}
+
+.owner-code-dialog {
+  width: min(460px, 94vw);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 1.4rem;
+  background: var(--surface);
+  box-shadow: 0 20px 60px rgba(37, 39, 25, 0.25);
+}

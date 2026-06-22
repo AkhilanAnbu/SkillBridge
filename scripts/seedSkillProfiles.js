@@ -130,11 +130,7 @@ const roles = ["Frontend", "Backend", "Full-stack", "Design/PM"];
 
 const meetingPreferences = ["In person", "Online", "Either"];
 
-const teammateStatuses = [
-  "Looking for a teammate",
-  "Open to help",
-  "Already in a team",
-];
+const teammateStatuses = ["Looking for a teammate", "Open to help", "Already in a team"];
 
 const notes = [
   "I am looking for someone reliable to work on a class project.",
@@ -167,12 +163,17 @@ function makeEmail(firstName, lastName, index) {
 function makeProfile(index) {
   const firstName = randomItem(firstNames);
   const lastName = randomItem(lastNames);
-  const teammatesNeeded = randomNumber(0, 4);
   const location = randomItem(locations);
+  const teammatesNeeded = randomNumber(0, 4);
 
   return {
     name: `${firstName} ${lastName}`,
     email: makeEmail(firstName, lastName, index),
+
+    // Demo owner code for seeded profiles.
+    // Use this code to test Edit/Delete/Mark teammate accepted.
+    ownerCode: "demo1234",
+
     major: randomItem(majors),
     city: location.city,
     country: location.country,
@@ -183,8 +184,7 @@ function makeProfile(index) {
     availability: randomItem(availabilityOptions),
     preferredRole: randomItem(roles),
     meetingPreference: randomItem(meetingPreferences),
-    teammateStatus:
-      teammatesNeeded === 0 ? "Already in a team" : randomItem(teammateStatuses),
+    teammateStatus: teammatesNeeded === 0 ? "Already in a team" : randomItem(teammateStatuses),
     notes: randomItem(notes),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -202,15 +202,16 @@ async function seedSkillProfiles() {
   console.log(`Deleted ${deleteResult.deletedCount} old profiles.`);
 
   console.log("Creating new randomized skill profiles with matching city/country...");
-  const profiles = Array.from({ length: 1005 }, (_, index) =>
-    makeProfile(index + 1),
-  );
+  const profiles = Array.from({ length: 1005 }, (_, index) => makeProfile(index + 1));
 
   await collection.insertMany(profiles);
 
   const finalCount = await collection.countDocuments();
   console.log(`Final profile count: ${finalCount}`);
-  console.log("Seed complete. Cities and countries now match correctly.");
+
+  console.log("Seed complete.");
+  console.log("MongoDB now has 1005 fresh skill profiles.");
+  console.log("Seeded demo owner code is: demo1234");
 
   process.exit(0);
 }

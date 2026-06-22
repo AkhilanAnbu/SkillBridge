@@ -1,29 +1,32 @@
-import { saveProject } from "./projectApi.js";
+import { saveProfile } from "./api.js";
 import { getElement, showMessage } from "./dom.js";
 
-function splitList(value) {
+function splitSkills(value) {
   return String(value || "")
     .split(",")
-    .map((item) => item.trim())
+    .map((skill) => skill.trim())
     .filter(Boolean);
 }
 
-function formToProject(form) {
+function formToProfile(form) {
   const formData = new FormData(form);
 
   return {
-    title: formData.get("title"),
-    creatorName: formData.get("creatorName"),
-    creatorEmail: formData.get("creatorEmail"),
-    category: formData.get("category"),
-    description: formData.get("description"),
-    schedule: formData.get("schedule"),
-    openPositions: formData.get("openPositions"),
-    status: formData.get("status"),
-    requiredSkills: splitList(formData.get("requiredSkills")),
-    learningOpportunities: splitList(formData.get("learningOpportunities")),
-    availableRoles: splitList(formData.get("availableRoles")),
-    currentMembers: splitList(formData.get("currentMembers")),
+    name: formData.get("name"),
+    email: formData.get("email"),
+    ownerCode: formData.get("ownerCode"),
+    major: formData.get("major"),
+    city: formData.get("city"),
+    country: formData.get("country"),
+    teammatesNeeded: Number.parseInt(formData.get("teammatesNeeded"), 10) || 0,
+    experienceLevel: formData.get("experienceLevel"),
+    availability: formData.get("availability"),
+    preferredRole: formData.get("preferredRole"),
+    meetingPreference: formData.get("meetingPreference"),
+    teammateStatus: formData.get("teammateStatus"),
+    skillsToTeach: splitSkills(formData.get("skillsToTeach")),
+    skillsToLearn: splitSkills(formData.get("skillsToLearn")),
+    notes: formData.get("notes"),
   };
 }
 
@@ -31,45 +34,60 @@ function listToText(list) {
   return Array.isArray(list) ? list.join(", ") : "";
 }
 
-export function setupProjectForm(afterSave) {
-  const form = getElement("#project-form");
-  const projectId = getElement("#project-id");
+function getTeammatesNeeded(profile) {
+  const value = Number.parseInt(profile.teammatesNeeded, 10);
+
+  if (Number.isNaN(value)) {
+    return 1;
+  }
+
+  return Math.max(0, value);
+}
+
+export function setupProfileForm(afterSave) {
+  const form = getElement("#profile-form");
+  const profileId = getElement("#profile-id");
   const title = getElement("#form-title");
   const cancelButton = getElement("#cancel-edit");
 
   function resetForm() {
     form.reset();
-    projectId.value = "";
-    title.textContent = "Create a Project Post";
+    profileId.value = "";
+    form.elements.teammatesNeeded.value = "1";
+    form.elements.ownerCode.required = true;
+    title.textContent = "Create a Skill Profile";
     cancelButton.hidden = true;
   }
 
-  function editProject(project) {
-    projectId.value = project._id;
-    form.elements.title.value = project.title || "";
-    form.elements.creatorName.value = project.creatorName || "";
-    form.elements.creatorEmail.value = project.creatorEmail || "";
-    form.elements.category.value = project.category || "";
-    form.elements.description.value = project.description || "";
-    form.elements.schedule.value = project.schedule || "";
-    form.elements.openPositions.value = project.openPositions || "";
-    form.elements.status.value = project.status || "";
-    form.elements.requiredSkills.value = listToText(project.requiredSkills);
-    form.elements.learningOpportunities.value = listToText(project.learningOpportunities);
-    form.elements.availableRoles.value = listToText(project.availableRoles);
-    form.elements.currentMembers.value = listToText(project.currentMembers);
+  function editProfile(profile) {
+    profileId.value = profile._id;
+    form.elements.name.value = profile.name || "";
+    form.elements.email.value = profile.email || "";
+    form.elements.ownerCode.value = profile.ownerCode || "";
+    form.elements.major.value = profile.major || "";
+    form.elements.city.value = profile.city || "";
+    form.elements.country.value = profile.country || "";
+    form.elements.teammatesNeeded.value = getTeammatesNeeded(profile);
+    form.elements.experienceLevel.value = profile.experienceLevel || "";
+    form.elements.availability.value = profile.availability || "";
+    form.elements.preferredRole.value = profile.preferredRole || "";
+    form.elements.meetingPreference.value = profile.meetingPreference || "";
+    form.elements.teammateStatus.value = profile.teammateStatus || "";
+    form.elements.skillsToTeach.value = listToText(profile.skillsToTeach);
+    form.elements.skillsToLearn.value = listToText(profile.skillsToLearn);
+    form.elements.notes.value = profile.notes || "";
 
-    title.textContent = `Edit "${project.title}"`;
+    title.textContent = `Edit ${profile.name}'s profile`;
     cancelButton.hidden = false;
-    getElement("#project-form-card").scrollIntoView({ behavior: "smooth" });
+    getElement("#profile-form-card").scrollIntoView({ behavior: "smooth" });
   }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     try {
-      await saveProject(formToProject(form), projectId.value);
-      showMessage(projectId.value ? "Project updated" : "Project created");
+      await saveProfile(formToProfile(form), profileId.value);
+      showMessage(profileId.value ? "Profile updated" : "Profile created");
       resetForm();
       await afterSave();
     } catch (error) {
@@ -79,5 +97,5 @@ export function setupProjectForm(afterSave) {
 
   cancelButton.addEventListener("click", resetForm);
 
-  return { editProject };
+  return { editProfile };
 }

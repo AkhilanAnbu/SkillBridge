@@ -1,4 +1,4 @@
-import { getProfiles, removeProfile, saveProfile } from "./api.js";
+import { getProfiles, saveProfile } from "./api.js";
 import { escapeHtml, getElement, showMessage } from "./dom.js";
 
 function chipList(items) {
@@ -34,6 +34,69 @@ function teamStatusText(profile) {
 
   const needed = getTeammatesNeeded(profile);
   return `${needed} teammate${needed === 1 ? "" : "s"} still needed`;
+}
+
+function setupOwnerCodeModal() {
+  const modal = getElement("#owner-code-modal");
+  const form = getElement("#owner-code-form");
+  const description = getElement("#owner-code-description");
+  const input = getElement("#owner-code-action-input");
+  const cancelButton = getElement("#cancel-owner-code");
+  const toggleButton = getElement("#toggle-action-owner-code");
+
+  let resolveOwnerCode = null;
+
+  function closeModal(value) {
+    modal.hidden = true;
+    input.value = "";
+    input.type = "password";
+    toggleButton.textContent = "Show";
+
+    if (resolveOwnerCode) {
+      resolveOwnerCode(value);
+      resolveOwnerCode = null;
+    }
+  }
+
+  toggleButton.addEventListener("click", () => {
+    const isHidden = input.type === "password";
+
+    input.type = isHidden ? "text" : "password";
+    toggleButton.textContent = isHidden ? "Hide" : "Show";
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    closeModal(input.value.trim());
+  });
+
+  cancelButton.addEventListener("click", () => {
+    closeModal("");
+  });
+
+  return function requestOwnerCode(actionName) {
+    description.textContent = `Enter the profile owner code to ${actionName}.`;
+    modal.hidden = false;
+    input.focus();
+
+    return new Promise((resolve) => {
+      resolveOwnerCode = resolve;
+    });
+  };
+}
+
+async function deleteProfile(profileId, ownerCode) {
+  const response = await fetch(`/api/skill-profiles/${profileId}`, {
+    method: "DELETE",
+    headers: {
+      "x-owner-code": ownerCode,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || "Could not delete profile.");
+  }
 }
 
 function defaultApplyMessage(profile) {
@@ -218,6 +281,7 @@ export function setupProfileList(onEdit) {
   const list = getElement("#profiles-list");
   const count = getElement("#profile-count");
   const filterForm = getElement("#filter-form");
+  const requestOwnerCode = setupOwnerCodeModal();
 
   let loadedProfiles = [];
   let currentPage = 1;
@@ -285,6 +349,13 @@ export function setupProfileList(onEdit) {
   }
 
   async function markAccepted(profile) {
+    const ownerCode = await requestOwnerCode("mark a teammate as accepted");
+
+    if (!ownerCode) {
+      showMessage("Owner code is required for this action.");
+      return;
+    }
+
     const currentNeeded = getTeammatesNeeded(profile);
     const nextNeeded = Math.max(0, currentNeeded - 1);
 
@@ -293,7 +364,7 @@ export function setupProfileList(onEdit) {
     }
 
     try {
-      await saveProfile({ ...profile, teammatesNeeded: nextNeeded }, profile._id);
+      await saveProfile({ ...profile, ownerCode, teammatesNeeded: nextNeeded }, profile._id);
       showMessage(
         nextNeeded === 0
           ? "Profile updated: teammate need is now filled."
@@ -358,20 +429,37 @@ export function setupProfileList(onEdit) {
     }
 
     if (button.dataset.action === "edit") {
-      onEdit(profile);
+      const ownerCode = await requestOwnerCode("edit this profile");
+
+      if (!ownerCode) {
+        showMessage("Owner code is required for this action.");
+        return;
+      }
+
+      onEdit({ ...profile, ownerCode });
+      showMessage("Edit mode opened. Update the form and click Save profile.");
       return;
     }
 
-    if (!window.confirm(`Delete ${profile.name}'s profile?`)) {
-      return;
-    }
+    if (button.dataset.action === "delete") {
+      const ownerCode = await requestOwnerCode("delete this profile");
 
-    try {
-      await removeProfile(profile._id);
-      showMessage("Profile deleted");
-      await loadProfiles();
-    } catch (error) {
-      showMessage(error.message);
+      if (!ownerCode) {
+        showMessage("Owner code is required for this action.");
+        return;
+      }
+
+      if (!window.confirm(`Delete ${profile.name}'s profile?`)) {
+        return;
+      }
+
+      try {
+        await deleteProfile(profile._id, ownerCode);
+        showMessage("Profile deleted");
+        await loadProfiles();
+      } catch (error) {
+        showMessage(error.message);
+      }
     }
   });
 

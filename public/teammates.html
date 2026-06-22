@@ -38,8 +38,8 @@
           <p class="eyebrow">Akhilan's full-stack module</p>
           <h1>Teammate Directory</h1>
           <p>
-            Find classmates by skills, role, city, availability, and team status. Apply to a
-            profile, or mark a teammate as accepted when the spot is filled.
+            Find classmates by skills, role, city, availability, and team status. Anyone can apply,
+            but only the profile owner can edit, delete, or mark a teammate as accepted.
           </p>
         </div>
 
@@ -173,8 +173,8 @@
       <section id="profile-form-card" class="panel form-card">
         <h2 id="form-title">Create a Skill Profile</h2>
         <p>
-          Add your skills, location, availability, and the number of teammates you still need. When
-          the number reaches 0, your profile will show that the teammate need was filled.
+          Add a private profile owner code. Only someone with this code can edit, delete, or mark a
+          teammate as accepted.
         </p>
 
         <form id="profile-form">
@@ -189,6 +189,24 @@
             <div>
               <label for="email">Email</label>
               <input id="email" name="email" type="email" required />
+            </div>
+
+            <div>
+              <label for="ownerCode">Profile owner code</label>
+              <div class="owner-code-row">
+                <input
+                  id="ownerCode"
+                  name="ownerCode"
+                  type="password"
+                  minlength="4"
+                  placeholder="Create or enter your private code"
+                  autocomplete="off"
+                  required
+                />
+                <button id="toggle-owner-code" class="small-button secondary" type="button">
+                  Show
+                </button>
+              </div>
             </div>
 
             <div>
@@ -293,6 +311,41 @@
         </form>
       </section>
     </main>
+
+    <section id="owner-code-modal" class="owner-code-modal" hidden>
+      <div
+        class="owner-code-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="owner-code-title"
+      >
+        <h2 id="owner-code-title">Profile owner code</h2>
+        <p id="owner-code-description">Enter the private owner code for this profile.</p>
+
+        <form id="owner-code-form">
+          <label for="owner-code-action-input">Owner code</label>
+
+          <div class="owner-code-row">
+            <input
+              id="owner-code-action-input"
+              name="ownerCode"
+              type="password"
+              minlength="4"
+              autocomplete="off"
+              required
+            />
+            <button id="toggle-action-owner-code" class="small-button secondary" type="button">
+              Show
+            </button>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="submit">Continue</button>
+            <button id="cancel-owner-code" class="button secondary" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
 
     <div id="message" class="message" hidden></div>
 
