@@ -9,14 +9,22 @@
       content="SkillBridge helps students find teammates, exchange skills, and start project collaborations."
     />
     <title>SkillBridge - Home</title>
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+    <link rel="icon" type="image/png" href="/images/skillbridge-bee-logo.png" />
+    <link rel="apple-touch-icon" href="/images/skillbridge-bee-logo.png" />
+
     <link rel="stylesheet" href="./css/base.css" />
     <link rel="stylesheet" href="./css/home.css" />
     <script type="module" src="./js/homePage.js"></script>
   </head>
+
   <body>
     <header class="site-header">
-      <a class="logo" href="./index.html">SkillBridge</a>
+      <a class="logo" href="./index.html" aria-label="SkillBridge home">
+        <img class="logo-image" src="/images/skillbridge-bee-logo.png" alt="SkillBridge bee logo" />
+        <span>SkillBridge</span>
+      </a>
+
       <nav aria-label="Main navigation">
         <a aria-current="page" href="./index.html">Home</a>
         <a href="./teammates.html">Teammate Directory</a>
@@ -34,6 +42,7 @@
             type of teammate they are looking for. It is built for class projects, hackathons,
             research ideas, and side projects.
           </p>
+
           <div class="hero-actions">
             <a class="button" href="./teammates.html">Find teammates</a>
             <a class="button secondary" href="./project-board.html">View project board</a>
@@ -54,17 +63,20 @@
 
       <section class="section-wrap">
         <h2>How it works</h2>
+
         <div class="cards">
           <article>
             <span>1</span>
             <h3>Create a skill profile</h3>
             <p>Add your skills, learning goals, role preference, and teammate status.</p>
           </article>
+
           <article>
             <span>2</span>
             <h3>Search people</h3>
             <p>Filter by skills, availability, experience, role, and team status.</p>
           </article>
+
           <article>
             <span>3</span>
             <h3>Start collaborating</h3>

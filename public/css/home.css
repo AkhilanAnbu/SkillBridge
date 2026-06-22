@@ -23,12 +23,22 @@
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 1.5rem;
-  background: white;
-  box-shadow: 0 10px 30px rgba(52, 78, 65, 0.1);
+  background: var(--surface);
+  box-shadow: 0 10px 30px var(--shadow);
 }
 
 .match-card {
   align-self: center;
+  border-top: 8px solid var(--sunflower);
+}
+
+.match-card h2 {
+  color: var(--charcoal-dark);
+}
+
+.match-card p,
+.match-card li {
+  color: var(--text);
 }
 
 .match-card ul {
@@ -41,7 +51,7 @@
   height: 12px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e3ebd7;
+  background: #efe5b8;
 }
 
 .meter span {
@@ -49,7 +59,7 @@
   width: 62%;
   height: 100%;
   border-radius: inherit;
-  background: var(--shamrock);
+  background: var(--sunflower);
   transition: width 400ms ease;
 }
 
@@ -59,15 +69,23 @@
   gap: 1rem;
 }
 
+.cards article {
+  border-top: 6px solid var(--sunflower);
+}
+
 .cards span {
   display: inline-grid;
   width: 2rem;
   height: 2rem;
   place-items: center;
   border-radius: 50%;
-  color: var(--brunswick);
-  background: var(--pistachio);
-  font-weight: 800;
+  color: var(--charcoal-dark);
+  background: var(--sunflower);
+  font-weight: 850;
+}
+
+.cards h3 {
+  color: var(--charcoal-dark);
 }
 
 @media (max-width: 850px) {

@@ -43,10 +43,11 @@
 
 .profile-card {
   border: 1px solid var(--line);
-  border-left: 8px solid var(--fern);
+  border-left: 8px solid var(--sunflower);
   border-radius: 18px;
   padding: 1rem;
-  background: white;
+  background: var(--surface);
+  box-shadow: 0 8px 22px var(--shadow);
 }
 
 .profile-top {
@@ -56,11 +57,19 @@
   gap: 1rem;
 }
 
+.profile-top h3 {
+  color: var(--charcoal-dark);
+}
+
+.profile-top p {
+  color: var(--muted);
+}
+
 .profile-top strong {
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
-  color: var(--brunswick);
-  background: var(--pistachio);
+  color: var(--charcoal-dark);
+  background: var(--sunflower);
   font-size: 0.85rem;
 }
 
@@ -72,9 +81,10 @@
 }
 
 .quick-info div {
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.6rem;
-  background: #f0f6e7;
+  background: var(--surface-soft);
 }
 
 .quick-info dt {
@@ -84,6 +94,7 @@
 
 .quick-info dd {
   margin: 0.25rem 0 0;
+  color: var(--text);
   font-weight: 700;
 }
 
@@ -103,7 +114,8 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0.35rem 0.6rem;
-  background: #f7faef;
+  color: var(--text);
+  background: #fff8d7;
   font-size: 0.9rem;
 }
 
@@ -126,7 +138,25 @@
   border: 1px dashed var(--line);
   border-radius: 16px;
   padding: 1.25rem;
-  background: white;
+  background: var(--surface);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.pagination span {
+  color: var(--hunter);
+  font-weight: 700;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 @media (max-width: 900px) {
