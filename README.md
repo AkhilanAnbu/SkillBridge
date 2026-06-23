@@ -125,7 +125,3 @@ npm run lint
 ## AI Usage Disclosure
 
 AI was used as a helper for planning the project structure and checking the rubric. The implementation was reviewed, edited, tested, and customized for our SkillBridge project.
-
-## Santhosh Handoff
-
-Santhosh will add the Project Collaboration Board with a second MongoDB collection called `projectCollaborations`. The final project should include CRUD for both `skillProfiles` and `projectCollaborations`.

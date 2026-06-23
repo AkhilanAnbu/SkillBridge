@@ -47,9 +47,14 @@ function makeSeedProject(index) {
 
 async function seed() {
   const collection = await getProjectCollaborationsCollection();
+
+  // Clear any existing project posts first so re-seeding lands on a clean count
+  // instead of adding on top of what is already there.
+  await collection.deleteMany({});
+
   const projects = [];
 
-  for (let i = 1; i <= 150; i += 1) {
+  for (let i = 1; i <= 1000; i += 1) {
     projects.push(makeSeedProject(i));
   }
 
