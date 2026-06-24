@@ -41,21 +41,27 @@
   gap: 1rem;
 }
 
-.project-card {
-  border: 1px solid var(--line);
-  border-left: 8px solid var(--sunflower);
-  border-radius: 18px;
-  padding: 1.1rem;
-  background: var(--surface);
-  box-shadow: 0 8px 22px var(--shadow);
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease;
+/* Horizontal scrolling row of project cards (distinct from the vertical
+   teammate list). The cards sit in a flex row that scrolls left-to-right. */
+.cards-scroller {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-snap-type: x proximity;
 }
 
-.project-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(80, 70, 30, 0.16);
+.cards-scroller .project-card {
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+}
+
+.project-card {
+  border: 1px solid var(--line);
+  border-left: 8px solid var(--shamrock);
+  border-radius: 18px;
+  padding: 1rem;
+  background: white;
 }
 
 .project-top {
@@ -65,47 +71,30 @@
   gap: 1rem;
 }
 
-.project-top h3 {
-  margin-bottom: 0.25rem;
-  color: var(--charcoal-dark);
-}
-
-.project-top p {
-  color: var(--muted);
-}
-
 .project-top strong {
-  border: 1px solid var(--deep-yellow);
   border-radius: 999px;
-  padding: 0.35rem 0.7rem;
-  color: var(--charcoal-dark);
-  background: var(--sunflower);
+  padding: 0.35rem 0.65rem;
+  color: var(--brunswick);
+  background: var(--pistachio);
   font-size: 0.85rem;
-  font-weight: 800;
   white-space: nowrap;
 }
 
 .project-top strong.status-in-progress {
-  border-color: var(--deep-yellow);
-  color: var(--charcoal-dark);
-  background: var(--soft-yellow);
+  background: #f3e2a9;
 }
 
 .project-top strong.status-full {
-  border-color: #c7b872;
-  color: var(--charcoal-dark);
-  background: #efe5b8;
+  background: #d9d2c4;
 }
 
 .project-top strong.status-completed {
-  border-color: var(--charcoal-dark);
-  color: var(--sunflower);
-  background: var(--charcoal-dark);
+  color: white;
+  background: var(--fern);
 }
 
 .project-desc {
-  margin: 0.9rem 0;
-  color: var(--muted);
+  margin: 0.8rem 0;
 }
 
 .quick-info {
@@ -116,10 +105,9 @@
 }
 
 .quick-info div {
-  border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 0.7rem;
-  background: var(--surface-soft);
+  padding: 0.6rem;
+  background: #f0f6e7;
 }
 
 .quick-info dt {
@@ -129,14 +117,13 @@
 
 .quick-info dd {
   margin: 0.25rem 0 0;
-  color: var(--text);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .skill-label {
   margin: 0.8rem 0 0.3rem;
   color: var(--hunter);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .chips {
@@ -148,9 +135,8 @@
 .chips span {
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 0.35rem 0.65rem;
-  color: var(--text);
-  background: #fff8d7;
+  padding: 0.35rem 0.6rem;
+  background: #f7faef;
   font-size: 0.9rem;
 }
 
@@ -164,17 +150,7 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1rem;
-}
-
-.pagination span {
-  color: var(--hunter);
-  font-weight: 700;
-}
-
-.pagination button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
+  margin-top: 0.5rem;
 }
 
 .form-card {
@@ -196,8 +172,7 @@
   border: 1px dashed var(--line);
   border-radius: 16px;
   padding: 1.25rem;
-  color: var(--muted);
-  background: var(--surface);
+  background: white;
 }
 
 @media (max-width: 900px) {

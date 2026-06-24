@@ -9,7 +9,12 @@ function chipList(items) {
 }
 
 function statusClass(status) {
-  return "status-" + String(status || "").toLowerCase().replaceAll(" ", "-");
+  return (
+    "status-" +
+    String(status || "")
+      .toLowerCase()
+      .replaceAll(" ", "-")
+  );
 }
 
 function projectCard(project) {
@@ -82,7 +87,9 @@ export function setupProjectList(onEdit) {
     }
 
     list.innerHTML = `
-      ${visibleProjects.map(projectCard).join("")}
+      <div class="cards-scroller">
+        ${visibleProjects.map(projectCard).join("")}
+      </div>
 
       <div class="pagination">
         <button
