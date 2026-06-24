@@ -24,9 +24,9 @@ Main pages:
 
 ## Public Demo Video
 
-Demo video: REPLACE_WITH_YOUR_PUBLIC_NARRATED_VIDEO_LINK
+Demo video: https://www.youtube.com/watch?v=ro99K7LrvsY
 
-The public narrated demo video should show:
+The public narrated demo video shows:
 
 - The deployed Render website.
 - The Home page.
