@@ -186,9 +186,15 @@ function getFilters(query) {
 router.get("/", async (request, response, next) => {
   try {
     const collection = await getSkillProfilesCollection();
+    const page = Math.max(1, parseInt(request.query.page) || 1);
+    const limit = 20;
+    const skip = (page - 1) * limit;
+
     const profiles = await collection
       .find(getFilters(request.query))
       .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
     response.json(profiles.map(redactProfile));
